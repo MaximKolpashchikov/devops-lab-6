@@ -1,0 +1,35 @@
+---
+- name: Install nginx
+  apt:
+    name: nginx
+    state: latest
+
+- name: Copy site config
+  template:
+    src: 'site.conf'
+    dest: '/etc/nginx/conf.d/{{ item }}.conf'
+    owner: root
+    group: root
+    mode: '0644'
+  loop: '{{ sites }}'
+
+- name: Create site directory
+  file:
+    path: '/var/www/{{ item }}/'
+    state: directory
+  loop: '{{ sites }}'
+
+- name: Copy site index
+  template:
+    src: 'index.html'
+    dest: '/var/www/{{ item }}/index.html'
+    owner: root
+    group: root
+    mode: '0644'
+  loop: '{{ sites }}'
+
+- name: Restart nginx
+  systemd:
+    name: nginx
+    state: restarted
+
